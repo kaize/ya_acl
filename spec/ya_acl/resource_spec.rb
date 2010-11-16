@@ -18,6 +18,14 @@ describe YaAcl::Resource do
   end
 
   it 'should be work allow? with inheritance' do
-    #TODO
+    resource = YaAcl::Resource.new 'controller_name', :admin do
+      index :allow => [:guest]
+      empty
+    end
+
+    resource.allow?(:index, :guest).should be_true
+    resource.allow?(:index, :admin).should be_true
+    resource.allow?(:empty, :admin).should be_true
+    resource.allow?(:empty, :guest).should be_false
   end
 end
