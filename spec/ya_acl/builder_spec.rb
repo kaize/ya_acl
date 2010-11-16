@@ -19,6 +19,6 @@ describe YaAcl::Builder do
         end
       end
     end
-    acl.allow? 'controller_name', :index, :admin
+    acl.check!('controller_name', :index, :admin).should be_true
   end
 end

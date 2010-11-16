@@ -25,10 +25,12 @@ module YaAcl
       res.allow? privilege, roles, options
     end
 
-    def check!(resource, privilege, roles, options)
-      unless alow?(resource, privilege, roles, options)
+    def check!(resource, privilege, roles, options = {})
+      unless allow?(resource, privilege, roles, options)
         raise AccessDeniedError.new("Access denied for '#{resource}' and privilege '#{privilege} with options '#{options}'")
       end
+
+      true
     end
   end
 end
