@@ -15,7 +15,7 @@ module YaAcl
       unless resource_roles
         resource_roles = @privilegies[privilege][privilege_key]
       end
-      return false if (resource_roles & [roles]).empty?
+      return false if (resource_roles & Array(roles)).empty?
 
       true
     end
