@@ -15,6 +15,7 @@ module YaAcl
 
     def roles &block
       self.instance_eval &block
+      self.acl.roles
     end
 
     def role(name, options = {})

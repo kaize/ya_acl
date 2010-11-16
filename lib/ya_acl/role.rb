@@ -5,5 +5,9 @@ module YaAcl
       self.name = name
       self.options = options
     end
+
+    def to_s
+      self.name
+    end
   end
 end
