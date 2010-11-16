@@ -19,8 +19,6 @@ describe YaAcl::Builder do
         end
       end
     end
-    acl.current_user_roles = [:admin]
-
-    acl.allow? 'controller_name', :index
+    acl.allow? 'controller_name', :index, :admin
   end
 end

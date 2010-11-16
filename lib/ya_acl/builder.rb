@@ -5,6 +5,7 @@ module YaAcl
     def self.build &block
       builder = new
       builder.instance_eval &block
+      builder.acl.freeze
       builder.acl
     end
 
@@ -20,11 +21,11 @@ module YaAcl
       self.acl.add_role Role.new(name, options)
     end
 
-    def resources &block
+    def resources(allow = [], &block)
       self.instance_eval &block
     end
 
-    def resource(name, &block)
+    def resource(name, allow = [], &block)
       self.acl.add_resource(Resource.new name, &block)
     end
   end

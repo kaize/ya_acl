@@ -4,7 +4,6 @@ module YaAcl
 
   class Acl
     attr_reader :roles, :resources
-    attr_accessor :current_user_roles
 
     def add_role(role)
       @roles ||= {}
@@ -21,13 +20,15 @@ module YaAcl
       resources[resource_name]
     end
 
-    def allow?(resource_name, privilege, options = {})
+    def allow?(resource_name, privilege, roles, options = {})
       res = resource(resource_name.to_s)
-      res.allow? privilege, current_user_roles, options
+      res.allow? privilege, roles, options
     end
 
-    def check!(resource, privilege, options)
-      raise AccessDeniedError.new("Access deny to '#{resource}' with privilege '#{privilege} and options '#{options}'") unless alow?(resource, privilege, options)
+    def check!(resource, privilege, roles, options)
+      unless alow?(resource, privilege, roles, options)
+        raise AccessDeniedError.new("Access denied for '#{resource}' and privilege '#{privilege} with options '#{options}'")
+      end
     end
   end
 end
