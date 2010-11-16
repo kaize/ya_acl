@@ -10,10 +10,10 @@ describe YaAcl::Resource do
     resource.allow?(:index, :admin).should be_true
     resource.allow?(:index, [:nobody, :admin]).should be_true
     resource.allow?(:index, [:nobody, :another_nobody]).should be_false
-    resource.allow?(:index, :admin, :format => :xml).should be_true
-    resource.allow?(:index, :moderator, :format => :json).should be_true
+    resource.allow?(:index, 'admin', :format => :xml).should be_true
+    resource.allow?('index', :moderator, :format => :json).should be_true
     resource.allow?(:index, :moderator, :format => :xml).should be_true
-    resource.allow?(:index, :nobody).should be_false
+    resource.allow?('index', 'nobody').should be_false
     resource.allow?(:index, :guest).should be_false
   end
 

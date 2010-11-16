@@ -8,32 +8,38 @@ module YaAcl
     end
 
     def allow?(privilege, roles, options = {})
-      unless @privilegies[privilege]
-        raise InvalidArgument.new "Unknown #{privilege} for resource '#{name}'"
+      p = privilege.to_sym
+      r = Array(roles).collect(&:to_sym)
+      unless @privilegies[p]
+        raise ::InvalidArgument.new "Unknown #{p} for resource '#{name}'"
       end
-      resource_roles = @privilegies[privilege][privilege_key(options)]
+      resource_roles = @privilegies[p][privilege_key(options)]
       unless resource_roles
-        resource_roles = @privilegies[privilege][privilege_key]
+        resource_roles = @privilegies[p][privilege_key]
       end
-      return false if (resource_roles & Array(roles)).empty?
+      return false if (resource_roles & r).empty?
 
       true
     end
 
     def allow(privilege, roles, options = {})
+      p = privilege.to_sym
+      r = roles.collect(&:to_sym)
       @privilegies ||= {}
-      @privilegies[privilege] ||= {}
+      @privilegies[p] ||= {}
       
       key = privilege_key(options)
-      @privilegies[privilege][key] = (@privilegies[privilege][key] || []) | roles
+      @privilegies[p][key] = (@privilegies[p][key] || []) | r
     end
 
     def deny(privilege, roles, options = {})
+      p = privilege.to_sym
+      r = roles.collect(&:to_sym)
       @privilegies ||= {}
-      @privilegies[privilege] ||= {}
+      @privilegies[p] ||= {}
 
       key = privilege_key(options)
-      @privilegies[privilege][key] = (@privilegies[privilege][key] || []) - roles
+      @privilegies[p][key] = (@privilegies[p][key] || []) - r
     end
 
     def method_missing(privilege, *args)
