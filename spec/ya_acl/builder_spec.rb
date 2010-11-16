@@ -8,17 +8,20 @@ describe YaAcl::Builder do
       end
     end
     
-    acl.roles.first.include?(:admin).should be_true
+    acl.roles.first.name.should == :admin
   end
 
   it 'should be add resource' do
+    resource_name = 'controller_name'
     acl = YaAcl::Builder.build do
-      resources do
-        resource 'controller_name' do
-          index :allow => [:admin]
+      resources :admin do
+        resource resource_name, [:another_admin] do
+          index :allow => [:operator]
         end
       end
     end
-    acl.check!('controller_name', :index, :admin).should be_true
+    acl.check!(resource_name, :index, :admin).should be_true
+    acl.check!(resource_name, :index, :another_admin).should be_true
+    acl.check!(resource_name, :index, :operator).should be_true
   end
 end

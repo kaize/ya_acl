@@ -2,8 +2,9 @@ module YaAcl
   class Resource
     attr_accessor :name
     
-    def initialize(name, &block)
+    def initialize(name, allow_roles = [],  &block)
       self.name = name
+      @allow_roles = Array(allow_roles)
       self.instance_eval &block
     end
 
@@ -24,7 +25,7 @@ module YaAcl
 
     def allow(privilege, roles, options = {})
       p = privilege.to_sym
-      r = roles.collect(&:to_sym)
+      r = roles.collect(&:to_sym) | @allow_roles
       @privilegies ||= {}
       @privilegies[p] ||= {}
       
