@@ -15,7 +15,7 @@ module YaAcl
 
     def roles &block
       self.instance_eval &block
-      self.acl.roles
+      self.acl.roles.collect { |item| item.name.to_sym }
     end
 
     def role(name, options = {})
