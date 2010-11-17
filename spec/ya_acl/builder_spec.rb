@@ -33,5 +33,6 @@ describe YaAcl::Builder do
     acl.allow?(resource_name, :show, :admin).should be_true
     acl.allow?(resource_name, :show, :user).should be_false
     acl.allow?(resource_name, :show, :operator).should be_false
+    acl.allow?('no_exists', :show, :operator).should be_false
   end
 end

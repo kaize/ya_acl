@@ -19,7 +19,7 @@ module YaAcl
     end
 
     def resource(resource_name)
-      raise "#{resource} doesn't exists" unless @resources.key? resource_name
+      raise ArgumentError, "#Resource '#{resource_name}' doesn't exists" unless @resources.key? resource_name
       @resources[resource_name.to_s]
     end
 
