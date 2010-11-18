@@ -1,5 +1,6 @@
 module YaAcl
   class Resource
+    
     attr_accessor :name
     
     def initialize(name, allow_roles = [],  &block)
@@ -54,6 +55,7 @@ module YaAcl
         deny(privilege, roles[:deny] || [], options)
       end
     end
+    alias_method :privilege, :method_missing
 
     private
       def create_privilege(privilege)

@@ -18,11 +18,13 @@ describe YaAcl::Builder do
         role :admin
         role :another_admin
         role :user
+        role :operator
       end
       resources :admin do
         resource resource_name, [:another_admin] do
           index :allow => [:operator]
-          show :allow => (roles - [:user])
+          privilege :show, :allow => [:operator]
+          edit
         end
       end
     end
@@ -32,7 +34,7 @@ describe YaAcl::Builder do
 
     acl.allow?(resource_name, :show, :admin).should be_true
     acl.allow?(resource_name, :show, :user).should be_false
-    acl.allow?(resource_name, :show, :operator).should be_false
-    acl.allow?('no_exists', :show, :operator).should be_false
+    acl.allow?(resource_name, :show, :operator).should be_true
+    acl.allow?(resource_name, :edit, :operator).should be_false
   end
 end
