@@ -25,6 +25,7 @@ describe YaAcl::Builder do
           index :allow => [:operator]
           privilege :show, :allow => [:operator]
           edit
+          update({:allow => [:operator]}, :format => 'json')
         end
       end
     end
@@ -36,5 +37,8 @@ describe YaAcl::Builder do
     acl.allow?(resource_name, :show, :user).should be_false
     acl.allow?(resource_name, :show, :operator).should be_true
     acl.allow?(resource_name, :edit, :operator).should be_false
+
+    acl.allow?(resource_name, :update, :operator).should be_false
+    acl.allow?(resource_name, :update, :operator, :format => 'json').should be_true
   end
 end

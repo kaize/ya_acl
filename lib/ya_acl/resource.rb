@@ -4,6 +4,7 @@ module YaAcl
     attr_accessor :name
     
     def initialize(name, allow_roles = [],  &block)
+      @privilegies = {}
       self.name = name
       @allow_roles = Array(allow_roles)
       self.instance_eval &block
@@ -20,14 +21,13 @@ module YaAcl
       unless resource_roles
         resource_roles = @privilegies[p][privilege_key]
       end
-      return false if (resource_roles & r).empty?
+      return false if (resource_roles & r || []).empty?
 
       true
     end
 
     def allow(privilege, roles, options = {})
       p = privilege.to_sym
-      @privilegies ||= {}
       @privilegies[p] ||= {}
       r = roles.collect(&:to_sym)
       key = privilege_key(options)
@@ -36,7 +36,6 @@ module YaAcl
 
     def deny(privilege, roles, options = {})
       p = privilege.to_sym
-      @privilegies ||= {}
       @privilegies[p] ||= {}
       r = roles.collect(&:to_sym)
       key = privilege_key(options)
