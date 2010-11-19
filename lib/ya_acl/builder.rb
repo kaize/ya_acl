@@ -6,7 +6,7 @@ module YaAcl
       builder = new
       builder.instance_eval &block
       builder.acl.freeze
-      builder.acl
+      Acl.instance = builder.acl
     end
 
     def initialize

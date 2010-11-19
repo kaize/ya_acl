@@ -2,13 +2,13 @@ require 'spec_helper'
 
 describe YaAcl::Builder do
   it 'should be add role' do
-    acl = YaAcl::Builder.build do
+    YaAcl::Builder.build do
       roles do
         role :admin, :name => 'Administrator'
       end
     end
     
-    acl.roles.first.name.should == :admin
+    YaAcl::Acl.instance.roles.first.name.should == :admin
   end
 
   it 'should be add resource' do

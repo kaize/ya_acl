@@ -4,6 +4,14 @@ module YaAcl
 
   class Acl
 
+    def self.instance
+      @@acl
+    end
+
+    def self.instance=(v)
+      @@acl = v
+    end
+
     def roles
       @roles.values
     end
