@@ -11,7 +11,7 @@ module YaAcl
 
     def allow?(privilege, roles, options = {})
       p = privilege.to_sym
-      r = Array(roles).collect(&:to_sym)
+      r = Array(roles).compact.collect(&:to_sym)
       unless @privilegies[p]
 
         raise ArgumentError.new "Unknown '#{p}' privilege for resource '#{name}'"
