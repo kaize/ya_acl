@@ -7,15 +7,14 @@ module YaAcl
       @privilegies = {}
       self.name = name
       @allow_roles = Array(allow_roles)
-      self.instance_eval &block
+      instance_eval &block
     end
 
     def allow?(privilege, roles, options = {})
       p = privilege.to_sym
       r = Array(roles).compact.collect(&:to_sym)
       unless @privilegies[p]
-
-        raise ArgumentError.new "Unknown '#{p}' privilege for resource '#{name}'"
+        raise ArgumentError, "Unknown '#{p}' privilege for resource '#{name}'"
       end
       resource_roles = @privilegies[p][privilege_key(options)]
       unless resource_roles
@@ -42,24 +41,16 @@ module YaAcl
       @privilegies[p][key] = (@privilegies[p][key] || []) - r
     end
 
-    def method_missing(privilege, *args)
-      roles = args.first || {} # allow, deny
-      if @allow_roles.any?
-        roles[:allow] ||= []
-        roles[:allow] |= @allow_roles
-      end
-      if roles
-        options = args[1] || {}
-        allow(privilege, roles[:allow] || [], options)
-        deny(privilege, roles[:deny] || [], options)
-      end
+    def method_missing(privilege, access = {}, options = {})
+      allow = (access[:allow] || []) | @allow_roles
+      deny = access[:deny] || []
+      
+      allow(privilege, allow, options)
+      deny(privilege, deny, options)
     end
     alias_method :privilege, :method_missing
 
     private
-      def create_privilege(privilege)
-        
-      end
       def privilege_key(options = {})
         options.any? ? options.sort.to_s : :default
       end
