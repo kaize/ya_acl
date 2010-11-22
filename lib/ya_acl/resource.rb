@@ -11,6 +11,8 @@ module YaAcl
     end
 
     def allow?(privilege, roles, params = [], options = {})
+      raise ArgumentError, 'Params must be an Array' unless params.kind_of?(Array)
+      
       p = privilege.to_sym
       r = Array(roles).compact.collect(&:to_sym)
       unless @privilegies[p]
@@ -55,12 +57,10 @@ module YaAcl
     end
 
     def method_missing(privilege, *args, &block)
-      access = args[0] || {}
-      allow = (access[:allow] || []) | @allow_roles
-      deny = access[:deny] || []
+      options = args[0] || {}
+      allow = (options.delete(:allow) || []) | @allow_roles
+      deny = options.delete(:deny) || []
 
-      options = args[1] || {}
-      
       allow(privilege, allow, options, block)
       deny(privilege, deny, options)
     end

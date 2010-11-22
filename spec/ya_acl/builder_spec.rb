@@ -25,7 +25,7 @@ describe YaAcl::Builder do
           index :allow => [:operator]
           privilege :show, :allow => [:operator]
           edit
-          update({:allow => [:operator]}, :format => 'json')
+          update :allow => [:operator], :format => 'json'
         end
       end
     end
