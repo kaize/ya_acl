@@ -31,15 +31,14 @@ module YaAcl
       @resources[resource_name.to_s]
     end
 
-    def allow?(resource_name, privilege, roles, options = {})
+    def allow?(resource_name, privilege, roles, params = [], options = {})
       res = resource(resource_name)
-      res.allow? privilege, roles, options
+      res.allow? privilege, roles, params, options
     end
 
-    def check!(resource, privilege, roles, options = {})
-      unless allow?(resource, privilege, roles, options)
-        #TODO another format for options
-        raise AccessDeniedError, "Access denied for '#{resource}' and privilege '#{privilege}' with options '#{options}'" 
+    def check!(resource, privilege, roles, params = [], options = {})
+      unless allow?(resource, privilege, roles, params, options)
+        raise AccessDeniedError, "Access denied for '#{resource}' and privilege '#{privilege}' with options '#{options.inspect}'"
       end
 
       true

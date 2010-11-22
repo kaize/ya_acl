@@ -29,6 +29,7 @@ describe YaAcl::Builder do
         end
       end
     end
+    
     acl.check!(resource_name, :index, :admin).should be_true
     acl.check!(resource_name, :index, :another_admin).should be_true
     acl.check!(resource_name, :index, :operator).should be_true
@@ -39,6 +40,6 @@ describe YaAcl::Builder do
     acl.allow?(resource_name, :edit, :operator).should be_false
 
     acl.allow?(resource_name, :update, :operator).should be_false
-    acl.allow?(resource_name, :update, :operator, :format => 'json').should be_true
+    acl.allow?(resource_name, :update, :operator, [], :format => 'json').should be_true
   end
 end

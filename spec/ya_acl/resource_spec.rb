@@ -28,4 +28,20 @@ describe YaAcl::Resource do
     resource.allow?(:empty, :admin).should be_true
     resource.allow?(:empty, :guest).should be_false
   end
+
+  it 'should be work allow? with assert' do
+    resource = YaAcl::Resource.new 'controller_name', :admin do
+      index :allow => [:guest], :format => 'xml' do |object_user_id, user_id|
+        assert :guest do
+          false if object_user_id != user_id
+        end
+      end
+    end
+
+    resource.allow?(:index, :guest, [3, 4]).should be_false
+    resource.allow?(:index, :guest, [3, 3]).should be_true
+    resource.allow?(:index, :guest, [3, 3], :format => 'xml').should be_true
+    resource.allow?(:index, :guest, [], :format => 'xml').should be_true
+    resource.allow?(:index, :admin, [3, 4], :format => 'xml').should be_true
+  end
 end
