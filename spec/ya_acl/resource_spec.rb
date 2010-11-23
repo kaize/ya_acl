@@ -35,9 +35,9 @@ describe YaAcl::Resource do
   it 'should be work allow? with assert' do
     resource = YaAcl::Resource.new 'controller_name', :admin do
       index :allow => [:guest], :format => 'xml' do |object_user_id, user_id|
-        assert :guest do
-          false if object_user_id != user_id
-        end
+        assert :guest, lambda {
+          object_user_id == user_id ? true : false
+        }
       end
     end
 

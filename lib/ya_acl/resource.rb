@@ -71,13 +71,15 @@ module YaAcl
         options.any? ? options.sort.to_s : :default
       end
       
-      def assert(*roles, &block)
+      def assert(*args)
+        func = args.pop
+        roles = args
         can_roles = @privilegies[@processing_privilege][@processing_key][:roles]
         if roles != can_roles & roles
           raise ArgumentError, "Not allowed for #{roles.inspect}"
         end
         return true unless (@processing_roles & roles).any?
-        return block.call
+        return func.call
       end
   end
 end
