@@ -49,14 +49,13 @@ describe YaAcl::Builder do
         roles do
           role :admin, :name => 'Administrator'
         end
-
         resources :admin do
-          resource 'resource', [:admin] do
+          resource 'resource' do
             index :allow => [:operator]
           end
         end
       end
-    }.should raise_exception(Exception)
+    }.should raise_exception(ArgumentError)
   end
 
   it 'should be raise exception for unknown role in resource' do
@@ -64,14 +63,15 @@ describe YaAcl::Builder do
       YaAcl::Builder.build do
         roles do
           role :admin, :name => 'Administrator'
+          role :operator
         end
 
         resources :admin do
           resource 'resource', [:another_admin] do
-            index :allow => [:admin]
+            index :allow => [:opeartor]
           end
         end
       end
-    }.should raise_exception(Exception)
+    }.should raise_exception(ArgumentError)
   end
 end

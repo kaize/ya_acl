@@ -15,7 +15,6 @@ module YaAcl
 
     def roles &block
       instance_eval &block
-      acl.roles.collect { |item| item.name.to_sym }
     end
 
     def role(name, options = {})
@@ -29,9 +28,17 @@ module YaAcl
 
     def resource(name, allow_roles = [], &block)
       raise ArgumentError, 'Options "allow_roles" must be Array' unless allow_roles.is_a? Array
+      raise ArgumentError, "Role '#{@global_allow_role}' already added for resource '#{name}'" if allow_roles.include? @global_allow_role
       resource_allow_roles = allow_roles << @global_allow_role
 
-      acl.add_resource(Resource.new name, resource_allow_roles, &block)
+      existing_roles = acl.roles.collect { |item| item.name.to_sym }
+      if allow_roles & existing_roles != allow_roles
+        raise ArgumentError, "Unknown roles #{allow_roles.inspect}"
+      end
+
+      #TODO
+      proxy = ResourceProxy.new(name, resource_allow_roles, existing_roles, &block)
+      acl.add_resource(proxy.resource)
     end
   end
 end

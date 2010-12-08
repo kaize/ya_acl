@@ -23,11 +23,6 @@ module YaAcl
 
     def add_resource(resource)
 
-      existing_roles = roles.collect { |item| item.name.to_sym }
-      if resource.allow_roles & existing_roles != resource.allow_roles
-        raise ArgumentError, "Unknown roles #{allow_roles.inspect}"
-      end
-
       @resources ||= {}
       @resources[resource.name] = resource
     end

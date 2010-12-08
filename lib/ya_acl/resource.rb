@@ -2,13 +2,10 @@ module YaAcl
   class Resource
     
     attr_accessor :name
-    attr_accessor :allow_roles
     
-    def initialize(name, allow_roles = [], &block)
+    def initialize(name)
       @privilegies = {}
       self.name = name
-      self.allow_roles = Array(allow_roles)
-      instance_eval &block
     end
 
     def allow?(privilege, roles, params = [], options = {})
@@ -56,16 +53,6 @@ module YaAcl
       @privilegies[p][key] ||= {}
       @privilegies[p][key][:roles] = (@privilegies[p][key][:roles] || []) - r
     end
-
-    def method_missing(privilege, *args, &check_block)
-      options = args[0] || {}
-      allow = (options.delete(:allow) || []) | allow_roles
-      deny = options.delete(:deny) || []
-
-      allow(privilege, allow, options, check_block)
-      deny(privilege, deny, options)
-    end
-    alias_method :privilege, :method_missing
 
     private
       def privilege_key(options = {})
