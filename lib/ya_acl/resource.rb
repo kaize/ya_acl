@@ -2,11 +2,12 @@ module YaAcl
   class Resource
     
     attr_accessor :name
+    attr_accessor :allow_roles
     
     def initialize(name, allow_roles = [], &block)
       @privilegies = {}
       self.name = name
-      @allow_roles = Array(allow_roles)
+      self.allow_roles = Array(allow_roles)
       instance_eval &block
     end
 
@@ -37,14 +38,14 @@ module YaAcl
       true
     end
 
-    def allow(privilege, roles, options = {}, assert_block = nil)
+    def allow(privilege, roles, options = {}, check_block = nil)
       p = privilege.to_sym
       @privilegies[p] ||= {}
       r = roles.collect(&:to_sym)
       key = privilege_key(options)
       @privilegies[p][key] ||= {}
       @privilegies[p][key][:roles] = (@privilegies[p][key][:roles] || []) | r
-      @privilegies[p][key][:assert] = assert_block
+      @privilegies[p][key][:assert] = check_block
     end
 
     def deny(privilege, roles, options = {})
@@ -56,12 +57,12 @@ module YaAcl
       @privilegies[p][key][:roles] = (@privilegies[p][key][:roles] || []) - r
     end
 
-    def method_missing(privilege, *args, &block)
+    def method_missing(privilege, *args, &check_block)
       options = args[0] || {}
-      allow = (options.delete(:allow) || []) | @allow_roles
+      allow = (options.delete(:allow) || []) | allow_roles
       deny = options.delete(:deny) || []
 
-      allow(privilege, allow, options, block)
+      allow(privilege, allow, options, check_block)
       deny(privilege, deny, options)
     end
     alias_method :privilege, :method_missing
@@ -79,7 +80,7 @@ module YaAcl
           raise ArgumentError, "Not allowed for #{roles.inspect}"
         end
         return true unless (@processing_roles & roles).any?
-        return func.call
+        func.call
       end
   end
 end

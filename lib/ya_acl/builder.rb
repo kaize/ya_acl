@@ -30,6 +30,7 @@ module YaAcl
     def resource(name, allow_roles = [], &block)
       raise ArgumentError, 'Options "allow_roles" must be Array' unless allow_roles.is_a? Array
       resource_allow_roles = allow_roles << @global_allow_role
+
       acl.add_resource(Resource.new name, resource_allow_roles, &block)
     end
   end

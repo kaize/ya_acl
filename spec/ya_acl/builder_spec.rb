@@ -42,4 +42,36 @@ describe YaAcl::Builder do
     acl.allow?(resource_name, :update, :operator).should be_false
     acl.allow?(resource_name, :update, :operator, [], :format => 'json').should be_true
   end
+
+  it 'should be raise exception for unknown role in privilegy' do
+    lambda {
+      YaAcl::Builder.build do
+        roles do
+          role :admin, :name => 'Administrator'
+        end
+
+        resources :admin do
+          resource 'resource', [:admin] do
+            index :allow => [:operator]
+          end
+        end
+      end
+    }.should raise_exception(Exception)
+  end
+
+  it 'should be raise exception for unknown role in resource' do
+    lambda {
+      YaAcl::Builder.build do
+        roles do
+          role :admin, :name => 'Administrator'
+        end
+
+        resources :admin do
+          resource 'resource', [:another_admin] do
+            index :allow => [:admin]
+          end
+        end
+      end
+    }.should raise_exception(Exception)
+  end
 end
