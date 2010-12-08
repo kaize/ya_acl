@@ -37,9 +37,9 @@ module YaAcl
       res.allow? privilege, roles, params, options
     end
 
-    def check!(resource, privilege, roles, params = [], options = {})
-      unless allow?(resource, privilege, roles, params, options)
-        raise AccessDeniedError, "Access denied for '#{resource}' and privilege '#{privilege}' with options '#{options.inspect}'"
+    def check!(resource_name, privilege, roles, params = [], options = {})
+      unless allow?(resource_name, privilege, roles, params, options)
+        raise AccessDeniedError, "Access denied for '#{resource_name}' and privilege '#{privilege}' with options '#{options.inspect}'"
       end
 
       true

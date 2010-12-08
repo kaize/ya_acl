@@ -2,12 +2,12 @@ require 'spec_helper'
 
 describe YaAcl::Resource do
   it 'should be work allow?' do
-    resource = YaAcl::Resource.new 'controller_name' do
-      index :allow => [:admin, :member], :deny => [:guest]
-      index :allow => [:moderator], :format => 'json'
-      update :allow => [:editor], :format => 'json'
-      update
-    end
+    resource = YaAcl::Resource.new 'controller_name'
+    resource.allow :index, [:admin, :member]
+    resource.deny :index, [:guest]
+    resource.allow :index, [:moderator], :format => 'json'
+    resource.allow :update, [:editor], :format => 'json'
+    resource.allow :update, [:admin]
 
     resource.name.should == 'controller_name'
     resource.allow?('index', :moderator, [], :format => 'json').should be_true
@@ -21,10 +21,9 @@ describe YaAcl::Resource do
   end
 
   it 'should be work allow? with inheritance' do
-    resource = YaAcl::Resource.new 'controller_name', :admin do
-      index :allow => [:guest]
-      empty
-    end
+    resource = YaAcl::Resource.new 'controller_name'
+    resource.allow :index, [:admin, :guest]
+    resource.allow :empty, [:admin]
 
     resource.allow?(:index, :guest).should be_true
     resource.allow?(:index, :admin).should be_true
@@ -33,12 +32,11 @@ describe YaAcl::Resource do
   end
 
   it 'should be work allow? with assert' do
-    resource = YaAcl::Resource.new 'controller_name', :admin do
-      index :allow => [:guest], :format => 'xml' do |object_user_id, user_id|
-        assert :guest, lambda {
-          object_user_id == user_id ? true : false
-        }
-      end
+    resource = YaAcl::Resource.new 'controller_name'
+    resource.allow :index, [:admin, :guest], :format => 'xml' do |object_user_id, user_id|
+      assert :guest, lambda {
+        object_user_id == user_id ? true : false
+      }
     end
 
     resource.allow?(:index, :guest, [3, 4]).should be_false

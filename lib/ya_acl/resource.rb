@@ -22,12 +22,11 @@ module YaAcl
       return false unless @privilegies[p][key]
       return false if (@privilegies[p][key][:roles] & r || []).empty?
 
-      privilege_accert = @privilegies[p][key][:assert]
-      if privilege_accert
-        @processing_privilege = privilege
-        @processing_key = key
-        @processing_roles = r
-        if false == privilege_accert.call(*params)
+      assert = @privilegies[p][key][:assert]
+      if assert
+        can_roles = @privilegies[p][key][:roles]
+
+        if false == assert.check(can_roles, r, params)
           return false
         end
       end
@@ -35,14 +34,14 @@ module YaAcl
       true
     end
 
-    def allow(privilege, roles, options = {}, check_block = nil)
+    def allow(privilege, roles, options = {}, &block)
       p = privilege.to_sym
       @privilegies[p] ||= {}
       r = roles.collect(&:to_sym)
       key = privilege_key(options)
       @privilegies[p][key] ||= {}
       @privilegies[p][key][:roles] = (@privilegies[p][key][:roles] || []) | r
-      @privilegies[p][key][:assert] = check_block
+      @privilegies[p][key][:assert] = block && Assert.new(&block) || nil
     end
 
     def deny(privilege, roles, options = {})
@@ -57,17 +56,6 @@ module YaAcl
     private
       def privilege_key(options = {})
         options.any? ? options.sort.to_s : :default
-      end
-      
-      def assert(*args)
-        func = args.pop
-        roles = args
-        can_roles = @privilegies[@processing_privilege][@processing_key][:roles]
-        if roles != can_roles & roles
-          raise ArgumentError, "Not allowed for #{roles.inspect}"
-        end
-        return true unless (@processing_roles & roles).any?
-        func.call
       end
   end
 end

@@ -74,4 +74,22 @@ describe YaAcl::Builder do
       end
     }.should raise_exception(ArgumentError)
   end
+
+  it 'should be work with assert' do
+    acl = YaAcl::Builder.build do
+      roles do
+        role :admin
+        role :another_user
+      end
+      resources :admin do
+        resource 'name', [:another_user] do
+          create do |var|
+            assert :admin, :another_user, lambda { true }
+          end
+        end
+      end
+    end
+
+    acl.check!('name', :create, :admin, [2]).should be_true
+  end
 end

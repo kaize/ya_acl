@@ -1,7 +1,7 @@
 module YaAcl
   class ResourceProxy
 
-    def initialize(name, allow_roles, existing_roles, &block)
+    def initialize(name, allow_roles, existing_roles, block)
       @resource = Resource.new(name)
       @allow_roles = allow_roles
       @existing_roles = existing_roles
@@ -14,6 +14,7 @@ module YaAcl
     
     def method_missing(privilege, *args, &check_block)
       options = args[0] || {}
+
       allow = (options.delete(:allow) || []) | @allow_roles
       deny = options.delete(:deny) || []
 
@@ -21,7 +22,7 @@ module YaAcl
         raise ArgumentError, "Check roles for resource #{@resource.name} and privilege '#{privilege}'"
       end
 
-      resource.allow(privilege, allow, options, check_block)
+      resource.allow(privilege, allow, options, &check_block)
       resource.deny(privilege, deny, options)
     end
     alias_method :privilege, :method_missing

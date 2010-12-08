@@ -37,7 +37,7 @@ module YaAcl
       end
 
       #TODO
-      proxy = ResourceProxy.new(name, resource_allow_roles, existing_roles, &block)
+      proxy = ResourceProxy.new(name, resource_allow_roles, existing_roles, block)
       acl.add_resource(proxy.resource)
     end
   end
