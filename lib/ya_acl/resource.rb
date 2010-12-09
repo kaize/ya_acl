@@ -26,8 +26,12 @@ module YaAcl
       if assert
         can_roles = @privilegies[p][key][:roles]
 
-        if false == assert.check(can_roles, r, params)
-          return false
+        begin
+          if false == assert.check(can_roles, r, params)
+            return false
+          end
+        rescue ArgumentError => e
+          raise ArgumentError, "Check asserts params for resource #{name} and privilege #{privilege}"
         end
       end
 
