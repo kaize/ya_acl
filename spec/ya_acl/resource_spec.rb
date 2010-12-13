@@ -34,7 +34,7 @@ describe YaAcl::Resource do
   it 'should be work allow? with assert' do
     resource = YaAcl::Resource.new 'controller_name'
     resource.allow :index, [:admin, :guest], :format => 'xml' do |object_user_id, user_id|
-      assert :guest, lambda {
+      assert [:guest], lambda {
         object_user_id == user_id ? true : false
       }
     end
@@ -50,7 +50,7 @@ describe YaAcl::Resource do
   it 'should be raise ArgumentError with assert' do
     resource = YaAcl::Resource.new 'controller_name'
     resource.allow :index, [:admin, :guest] do |object_user_id, user_id|
-      assert :guest, lambda {
+      assert [:guest], lambda {
         object_user_id == user_id ? true : false
       }
     end

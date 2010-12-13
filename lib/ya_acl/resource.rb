@@ -18,20 +18,15 @@ module YaAcl
       end
       key = privilege_key(options)
       key = privilege_key unless @privilegies[p][key]
-
+      
       return false unless @privilegies[p][key]
       return false if (@privilegies[p][key][:roles] & r || []).empty?
 
       assert = @privilegies[p][key][:assert]
       if assert
         can_roles = @privilegies[p][key][:roles]
-
-        begin
-          if false == assert.check(can_roles, r, params)
-            return false
-          end
-        rescue ArgumentError => e
-          raise ArgumentError, "Check asserts params for resource #{name} and privilege #{privilege}"
+        if false == assert.check(can_roles, r, params)
+          return false
         end
       end
 

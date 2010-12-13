@@ -8,20 +8,20 @@ module YaAcl
       @can_roles = can_roles
       @processing_roles = processing_roles
 
-      @result = false
+      @result = true
       instance_exec(*params, &@block)
       @result
     end
 
-    def assert(*args)
-      func = args.pop
-      roles = args
-
+    def assert(roles, func)
+      unless roles.is_a? Array
+        raise ArgumentError, "Expected roles array for asserts, but given '#{roles.inspect}'"
+      end
       if roles != (roles & @can_roles)
-        raise ArgumentError, "Not allowed for #{roles.inspect}"
+        raise ArgumentError, "Not allowed for #{roles.inspect} (Check roles for your asserts)"
       end
 
-      @result = (@processing_roles & roles).any? ? func.call : true
+      @result = func.call if (@processing_roles & roles).any? && @result
     end
   end
 end

@@ -75,21 +75,53 @@ describe YaAcl::Builder do
     }.should raise_exception(ArgumentError)
   end
 
-  it 'should be work with assert' do
+  it 'should be work with asserts' do
+    resource_name = 'name'
     acl = YaAcl::Builder.build do
       roles do
         role :admin
         role :another_user
+        role :editor
+        role :operator
       end
       resources :admin do
-        resource 'name', [:another_user] do
+        resource resource_name, [:another_user, :editor, :operator] do
           create do |var|
-            assert :admin, :another_user, lambda { true }
+            assert [:admin, :another_user], lambda { var }
+          end
+          update :deny => [:another_user] do |first, second|
+            assert [:editor], lambda {
+              statuses = [1, 2]
+              statuses.include? first
+            }
+            assert [:editor, :operator], lambda {
+              !!first
+            }
+            assert [:operator], lambda {
+              statuses = [1, 2]
+              statuses.include? first
+            }
+            assert [:operator], lambda {
+              first == second
+            }
           end
         end
       end
     end
 
-    acl.check!('name', :create, :admin, [2]).should be_true
+    acl.allow?(resource_name, :update, :editor, [true, false]).should be_false
+    
+    acl.allow?(resource_name, :update, :editor, [false, true]).should be_false
+    acl.allow?(resource_name, :update, :editor, [1, true]).should be_true
+    
+    acl.check!(resource_name, :create, :admin, [2]).should be_true
+    acl.allow?(resource_name, :update, :another_user).should be_false
+    
+
+    acl.allow?(resource_name, :update, :editor, [3, false]).should be_false
+
+    acl.allow?(resource_name, :update, :operator, [true, true]).should be_false
+    acl.allow?(resource_name, :update, :operator, [1, 1]).should be_true
+    acl.allow?(resource_name, :update, :operator, [3, 3]).should be_false
   end
 end
