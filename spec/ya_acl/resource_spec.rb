@@ -39,10 +39,11 @@ describe YaAcl::Resource do
       }
     end
 
+    resource.allow?(:index, :guest, [3, 4], :format => 'xml').should be_false
+
     resource.allow?(:index, :guest, [3, 4]).should be_false
     resource.allow?(:index, :guest, [3, 3]).should be_false
     resource.allow?(:index, :guest, [3, 3], :format => 'xml').should be_true
-    resource.allow?(:index, :guest, [3, 4], :format => 'xml').should be_false
     resource.allow?(:index, :guest, [], :format => 'xml').should be_true
     resource.allow?(:index, :admin, [3, 4], :format => 'xml').should be_true
   end
@@ -56,5 +57,16 @@ describe YaAcl::Resource do
     end
 
     resource.allow?(:index, :guest)
+  end
+
+  it 'should be work with roles' do
+    resource = YaAcl::Resource.new 'controller_name'
+    resource.allow :index, [:admin, :guest] do
+      assert [:guest], lambda { false }
+    end
+    resource.allow :empty, [:admin]
+
+    resource.allow?(:empty, [:guest, :admin]).should be_true
+    resource.allow?(:index, [:guest, :admin]).should be_true
   end
 end

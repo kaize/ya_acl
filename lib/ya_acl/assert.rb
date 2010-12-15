@@ -8,9 +8,15 @@ module YaAcl
       @can_roles = can_roles
       @processing_roles = processing_roles
 
-      @result = true
+      @results = {}
+      @processing_roles.each {|role| @results[role] = true }
       instance_exec(*params, &@block)
-      @result
+
+      @results.values.each do |result|
+        return true if result
+      end
+
+      false
     end
 
     def assert(roles, func)
@@ -21,7 +27,13 @@ module YaAcl
         raise ArgumentError, "Not allowed for #{roles.inspect} (Check roles for your asserts)"
       end
 
-      @result = func.call if (@processing_roles & roles).any? && @result
+      roles_for_assert = @processing_roles & roles
+      if roles_for_assert.any?
+        result = func.call
+        roles_for_assert.each do |role|
+          @results[role] = result if @results[role] 
+        end
+      end
     end
   end
 end

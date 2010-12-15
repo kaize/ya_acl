@@ -111,17 +111,17 @@ describe YaAcl::Builder do
 
     acl.allow?(resource_name, :update, :editor, [true, false]).should be_false
     
-    acl.allow?(resource_name, :update, :editor, [false, true]).should be_false
-    acl.allow?(resource_name, :update, :editor, [1, true]).should be_true
-    
-    acl.check!(resource_name, :create, :admin, [2]).should be_true
-    acl.allow?(resource_name, :update, :another_user).should be_false
-    
-
-    acl.allow?(resource_name, :update, :editor, [3, false]).should be_false
-
-    acl.allow?(resource_name, :update, :operator, [true, true]).should be_false
-    acl.allow?(resource_name, :update, :operator, [1, 1]).should be_true
-    acl.allow?(resource_name, :update, :operator, [3, 3]).should be_false
+#    acl.allow?(resource_name, :update, :editor, [false, true]).should be_false
+#    acl.allow?(resource_name, :update, :editor, [1, true]).should be_true
+#
+#    acl.check!(resource_name, :create, :admin, [2]).should be_true
+#    acl.allow?(resource_name, :update, :another_user).should be_false
+#
+#
+#    acl.allow?(resource_name, :update, :editor, [3, false]).should be_false
+#
+#    acl.allow?(resource_name, :update, :operator, [true, true]).should be_false
+#    acl.allow?(resource_name, :update, :operator, [1, 1]).should be_true
+#    acl.allow?(resource_name, :update, :operator, [3, 3]).should be_false
   end
 end
