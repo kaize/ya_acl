@@ -37,7 +37,7 @@ describe YaAcl::Builder do
           privilege :edit
           privilege :update, [:operator], :format => 'json'
           privilege :with_assert, [:operator] do
-            assert :first_assert, [:operator]
+            assert :first_assert
             assert :another_assert, [:admin]
           end
         end

@@ -55,7 +55,7 @@ module YaAcl
 
         asserts = {}
         if block_given?
-          proxy = AssertProxy.new(asserts_block)
+          proxy = AssertProxy.new(asserts_block, all_allow_roles)
           asserts = proxy.asserts
         end
         
@@ -74,12 +74,14 @@ module YaAcl
     class AssertProxy
       attr_reader :asserts
       
-      def initialize(block)
+      def initialize(block, all_allow_roles)
+        @all_allow_roles = all_allow_roles
         @asserts = {}
         instance_eval &block
       end
 
-      def assert(name, roles)
+      def assert(name, roles = [])
+        roles = @all_allow_roles unless roles.any?
         roles.each do |role|
           @asserts[role] ||= []
           @asserts[role] << name
