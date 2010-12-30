@@ -1,9 +1,9 @@
 module YaAcl
   class Role
-    attr_accessor :name, :options
+    attr_reader :name, :options
     def initialize(name, options = {})
-      self.name = name
-      self.options = options
+      @name = name.to_sym
+      @options = options
     end
 
     def to_s

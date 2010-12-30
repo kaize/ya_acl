@@ -13,12 +13,20 @@ module YaAcl
       self.acl = Acl.new
     end
 
-    def roles &block
+    def roles(&block)
       instance_eval &block
     end
 
     def role(name, options = {})
       acl.add_role Role.new(name, options)
+    end
+
+    def asserts(&block)
+      instance_eval &block
+    end
+
+    def assert(name, &block)
+      acl.add_assert Assert.new(name, &block)
     end
 
     def resources(allow, &block)
@@ -28,17 +36,55 @@ module YaAcl
 
     def resource(name, allow_roles = [], &block)
       raise ArgumentError, 'Options "allow_roles" must be Array' unless allow_roles.is_a? Array
-      raise ArgumentError, "Role '#{@global_allow_role}' already added for resource '#{name}'" if allow_roles.include? @global_allow_role
       resource_allow_roles = allow_roles << @global_allow_role
+      resource = Resource.new(name)
+      acl.add_resource resource
+      PrivilegeProxy.new(resource.name, resource_allow_roles, acl, block)
+    end
 
-      existing_roles = acl.roles.collect { |item| item.name.to_sym }
-      if allow_roles & existing_roles != allow_roles
-        raise ArgumentError, "Unknown roles #{allow_roles.inspect}"
+    class PrivilegeProxy
+      def initialize(name, allow_roles, acl, block)
+        @resource_name = name
+        @allow_roles = allow_roles
+        @acl = acl
+        instance_eval &block
       end
 
-      #TODO
-      proxy = ResourceProxy.new(name, resource_allow_roles, existing_roles, block)
-      acl.add_resource(proxy.resource)
+      def privilege(privilege_name, roles = [], options = {}, &asserts_block)
+        all_allow_roles = roles | @allow_roles
+
+        asserts = {}
+        if block_given?
+          proxy = AssertProxy.new(asserts_block)
+          asserts = proxy.asserts
+        end
+        
+        all_allow_roles.each do |role|
+          if asserts[role]
+            asserts[role].each do |assert|
+              @acl.allow(@resource_name, privilege_name, role, assert, options)
+            end
+          else
+            @acl.allow(@resource_name, privilege_name, role, nil, options)
+          end
+        end
+      end
+    end
+
+    class AssertProxy
+      attr_reader :asserts
+      
+      def initialize(block)
+        @asserts = {}
+        instance_eval &block
+      end
+
+      def assert(name, roles)
+        roles.each do |role|
+          @asserts[role] ||= []
+          @asserts[role] << name
+        end
+      end
     end
   end
 end
