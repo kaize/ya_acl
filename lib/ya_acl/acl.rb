@@ -114,6 +114,10 @@ module YaAcl
       p = privilege_name.to_sym
       key = build_key(options)
 
+      unless @acl[r.name][p]
+        raise ArgumentError, "Undefine privilege '#{privilege_name}' for resource '#{resource_name}'"
+      end
+
       @acl[r.name][p][key] || @acl[r.name][p][:default]
     end
     
