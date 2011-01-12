@@ -4,6 +4,9 @@ module YaAcl
   class AssertAccessDeniedError < AccessDeniedError ; end
 
   class Acl
+
+    attr_reader :roles, :resources, :asserts
+
     class << self
       def instance
         @@acl
@@ -27,7 +30,7 @@ module YaAcl
       raise ArgumentError, "#Role '#{role_name}' doesn't exists" if !defined?(@roles) || !@roles[role_name.to_sym]
       @roles[role_name.to_sym]
     end
-
+    
     def add_resource(resource)
       @resources ||= {}
       @resources[resource.name] = resource
