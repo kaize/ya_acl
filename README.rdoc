@@ -1,32 +1,61 @@
 == ya_acl
 
-    YaAcl::Builder.build do
+    acl = YaAcl::Builder.build do
       roles do
         role :admin
-        role :user
-        role :guest
+        role :another_user
+        role :editor
+        role :operator
       end
-      resources :admin do # all resources allow for admin
-        resource 'resource_name', [:user] do # all privileges allow for user
-          index
-          privilege :show, :allow => [:guest] # alternative syntax for exists method
-          edit :allow => [:guest], :deny => [:user]
-          update({:allow => [:guest], :deny => [:user]}, :format => 'json')
-          update :deny => [:admin]
+
+      asserts do
+        assert :first do |var|
+          var
+        end
+
+        assert :another do |first, second|
+          statuses = [1, 2]
+          statuses.include? first
+        end
+
+        assert :another2 do |first, second|
+          !!first
+        end
+
+        assert :another3 do |first, second|
+          statuses = [1, 2]
+          statuses.include? first
+        end
+
+        assert :another4 do |first, second|
+          first == second
+        end
+      end
+
+      resources :admin do
+        resource :name, [:editor, :operator] do
+          privilege :create do |var|
+            assert :first, [:admin, :another_user]
+          end
+          privilege :update do |first, second|
+            assert :another, [:editor]
+            assert :another2, [:editor, :operator]
+            assert :another3, [:operator]
+            assert :another4, [:operator]
+          end
+          privilege :edit
+          privilege :new, [:another_user]
         end
       end
     end
 
-    acl = YaAcl::Acl.instance
-
-    acl.check!('resource_name', :index, :guest) # raise AccessDeniedError
-    acl.check!('resource_name', :index, :admin) # true
-    acl.check!('resource_name', :index, :user) # true
-
-    acl.allow?('resource_name', :show, :guest) # true
-    acl.allow?('resource_name', :edit, :user) # false
-
-    acl.allow?('resource_name', :update, :user) # true
-    acl.allow?('resource_name', :update, :user, :format => 'json') # false
-    acl.allow?('resource_name', :update, :guest) # false
-    acl.allow?('resource_name', :update, :guest, :format => 'json') # true
+    acl.allow?(:name, :update, [:another_user])           # false
+    acl.allow?(:name, :update, [:editor], [true, false])  # false
+    acl.allow?(:name, :update, [:editor], [1, true])      # true
+    acl.check!(:name, :create, [:admin], [2])             # true
+    acl.allow?(:name, :update, [:editor], [3, false])     # false
+    acl.allow?(:name, :update, [:operator], [true, true]) # false
+    acl.allow?(:name, :update, [:operator], [1, 1])       # true
+    acl.allow?(:name, :update, [:operator], [3, 3])       # false
+    acl.allow?(:name, :edit, [:operator])                 # true
+    acl.allow?(:name, :new, [:another_user])              # true
