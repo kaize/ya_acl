@@ -1,2 +1,6 @@
+pkg/*
+*.gem
+.bundle
 nbproject
 .idea
+Gemfile.lock
