@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.summary     = %q{Yet Another ACL}
   s.description = %q{Yet Another ACL}
 
-  s.rubyforge_project = "ya_acl"
+#  s.rubyforge_project = "ya_acl"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
