@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>allow (YaAcl::Acl)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/ya_acl/acl.rb, line 54</span>
+    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">allow</span>(<span class="ruby-identifier">resource_name</span>, <span class="ruby-identifier">privilege_name</span>, <span class="ruby-identifier">role_name</span>, <span class="ruby-identifier">assert_name</span> = <span class="ruby-keyword kw">nil</span>, <span class="ruby-identifier">options</span> = {})
+      <span class="ruby-identifier">resource</span>  = <span class="ruby-identifier">resource</span>(<span class="ruby-identifier">resource_name</span>).<span class="ruby-identifier">name</span>
+      <span class="ruby-identifier">privilege</span> = <span class="ruby-identifier">privilege_name</span>.<span class="ruby-identifier">to_sym</span>
+      <span class="ruby-identifier">role</span>      = <span class="ruby-identifier">role</span>(<span class="ruby-identifier">role_name</span>).<span class="ruby-identifier">name</span>
+      <span class="ruby-identifier">key</span>       = <span class="ruby-identifier">build_key</span>(<span class="ruby-identifier">options</span>)
+
+      <span class="ruby-ivar">@acl</span>[<span class="ruby-identifier">resource</span>] <span class="ruby-operator">||=</span> {}
+      <span class="ruby-ivar">@acl</span>[<span class="ruby-identifier">resource</span>][<span class="ruby-identifier">privilege</span>] <span class="ruby-operator">||=</span> {}
+      <span class="ruby-ivar">@acl</span>[<span class="ruby-identifier">resource</span>][<span class="ruby-identifier">privilege</span>][<span class="ruby-identifier">key</span>] <span class="ruby-operator">||=</span> {}
+      <span class="ruby-ivar">@acl</span>[<span class="ruby-identifier">resource</span>][<span class="ruby-identifier">privilege</span>][<span class="ruby-identifier">key</span>][<span class="ruby-identifier">role</span>] <span class="ruby-operator">||=</span> {}
+      <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">assert_name</span>
+        <span class="ruby-identifier">assert</span> = <span class="ruby-identifier">assert</span>(<span class="ruby-identifier">assert_name</span>)
+        <span class="ruby-ivar">@acl</span>[<span class="ruby-identifier">resource</span>][<span class="ruby-identifier">privilege</span>][<span class="ruby-identifier">key</span>][<span class="ruby-identifier">role</span>][<span class="ruby-identifier">assert</span>.<span class="ruby-identifier">name</span>] = <span class="ruby-identifier">assert</span>
+      <span class="ruby-keyword kw">end</span>
+    <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

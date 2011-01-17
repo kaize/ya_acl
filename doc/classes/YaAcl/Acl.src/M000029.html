@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>check (YaAcl::Acl)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/ya_acl/acl.rb, line 70</span>
+    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">check</span>(<span class="ruby-identifier">resource_name</span>, <span class="ruby-identifier">privilege_name</span>, <span class="ruby-identifier">roles</span> = [], <span class="ruby-identifier">params</span> = [], <span class="ruby-identifier">options</span> = {})
+      <span class="ruby-identifier">a_l</span> = <span class="ruby-identifier">access_list</span>(<span class="ruby-identifier">resource_name</span>, <span class="ruby-identifier">privilege_name</span>, <span class="ruby-identifier">options</span>)
+      <span class="ruby-keyword kw">return</span> <span class="ruby-constant">Result</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword kw">false</span>) <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">a_l</span>.<span class="ruby-identifier">nil?</span>
+      <span class="ruby-identifier">roles_for_check</span> = <span class="ruby-identifier">a_l</span>.<span class="ruby-identifier">keys</span> <span class="ruby-operator">&amp;</span> <span class="ruby-identifier">roles</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">:to_sym</span>)
+      <span class="ruby-keyword kw">return</span> <span class="ruby-constant">Result</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword kw">false</span>) <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">roles_for_check</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-comment cmt"># return</span>
+
+      <span class="ruby-identifier">role_for_result</span> = <span class="ruby-keyword kw">nil</span>
+      <span class="ruby-identifier">assert_for_result</span> = <span class="ruby-keyword kw">nil</span>
+      <span class="ruby-identifier">roles_for_check</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">role</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">role_for_result</span> = <span class="ruby-identifier">role</span>
+        <span class="ruby-identifier">asserts</span> = <span class="ruby-identifier">a_l</span>[<span class="ruby-identifier">role</span>]
+        <span class="ruby-keyword kw">return</span> <span class="ruby-constant">Result</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">asserts</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-comment cmt">#return</span>
+        <span class="ruby-identifier">assert</span> = <span class="ruby-keyword kw">nil</span>
+        <span class="ruby-identifier">result</span> = <span class="ruby-keyword kw">true</span>
+        <span class="ruby-identifier">asserts</span>.<span class="ruby-identifier">values</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">assert</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">assert_for_result</span> = <span class="ruby-identifier">assert</span>
+          <span class="ruby-identifier">result</span> = <span class="ruby-identifier">assert</span>.<span class="ruby-identifier">allow?</span>(<span class="ruby-identifier">params</span>)
+          <span class="ruby-keyword kw">break</span> <span class="ruby-keyword kw">unless</span> <span class="ruby-identifier">result</span>
+        <span class="ruby-keyword kw">end</span>
+        <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">result</span>
+          <span class="ruby-keyword kw">return</span> <span class="ruby-constant">Result</span>.<span class="ruby-identifier">new</span> <span class="ruby-comment cmt"># return</span>
+        <span class="ruby-keyword kw">end</span>
+      <span class="ruby-keyword kw">end</span>
+
+      <span class="ruby-keyword kw">return</span> <span class="ruby-constant">Result</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword kw">false</span>, <span class="ruby-identifier">role_for_result</span>, <span class="ruby-identifier">assert_for_result</span>) <span class="ruby-comment cmt"># return</span>
+    <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>
