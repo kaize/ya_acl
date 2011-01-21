@@ -1,5 +1,8 @@
 == ya_acl
 
+http://en.wikipedia.org/wiki/Role-based_access_control
+http://en.wikipedia.org/wiki/Assertion_(computing)
+
     acl = YaAcl::Builder.build do
       roles do
         role :admin
