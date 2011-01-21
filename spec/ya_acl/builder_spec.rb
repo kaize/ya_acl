@@ -35,7 +35,7 @@ describe YaAcl::Builder do
           privilege :index, [:operator]
           privilege :show, [:operator]
           privilege :edit
-          privilege :update, [:operator], :format => 'json'
+          privilege :update, [:operator], :format => 'json', :another_option => true
           privilege :with_assert, [:operator] do
             assert :first_assert
             assert :another_assert, [:admin]
@@ -44,6 +44,8 @@ describe YaAcl::Builder do
       end
     end
     
+    acl.allow?(:name, :update, [:operator], [], :format => 'json').should be_false
+    acl.allow?(:name, :update, [:operator], [], :format => 'json', :another_option => true, :yet_a_o => 'haha').should be_true
     acl.check!(:name, :index, [:admin]).should be_true
     acl.check!(:name, :index, [:another_admin]).should be_true
     acl.check!(:name, :index, [:operator]).should be_true
@@ -54,7 +56,6 @@ describe YaAcl::Builder do
     acl.allow?(:name, :edit, [:operator]).should be_false
 
     acl.allow?(:name, :update, [:operator]).should be_false
-    acl.allow?(:name, :update, [:operator], [], :format => 'json').should be_true
   end
 
   it 'should be raise exception for unknown role in privilegy' do

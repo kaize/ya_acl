@@ -115,17 +115,30 @@ module YaAcl
     def access_list(resource_name, privilege_name, options = {})
       r = resource(resource_name)
       p = privilege_name.to_sym
-      key = build_key(options)
-
       unless @acl[r.name][p]
         raise ArgumentError, "Undefine privilege '#{privilege_name}' for resource '#{resource_name}'"
       end
 
-      @acl[r.name][p][key] || @acl[r.name][p][:default]
+      data = @acl[r.name][p][:default]
+      @acl[r.name][p].each_pair do |privilege_key, privilege_params|
+        next if privilege_key == :default
+        privilege_options = Marshal.load(privilege_key)
+
+        compare = true
+        privilege_options.each_pair do |key, value|
+          compare = false if options[key] != value
+        end
+        next unless compare
+        
+        data = privilege_params
+      end
+      data
     end
     
     def build_key(options = {})
-      options.any? ? options.sort.to_s : :default
+      options.any? ? Marshal.dump(options) : :default
     end
+
+    private
   end
 end
