@@ -31,13 +31,13 @@ describe YaAcl::Acl do
   end
 
   it 'should be work allow? with assert' do
-    @acl.allow :name, :index, :admin, nil, :format => 'xml'
-    @acl.allow :name, :index, :guest, :assert, :format => 'xml'
+    @acl.allow :name, :index, :admin
+    @acl.allow :name, :index, :guest, :assert
     @acl.allow :name, :index, :member, :assert
 
 
     @acl.allow?(:name, :index, [:guest], [3, 4]).should be_false
-    @acl.allow?(:name, :index, [:guest], [3, 3]).should be_false
+    @acl.allow?(:name, :index, [:guest], [3, 3]).should be_true
     @acl.allow?(:name, :index, [:member])
   end
 

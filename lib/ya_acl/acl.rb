@@ -27,7 +27,9 @@ module YaAcl
     end
 
     def role(role_name)
-      raise ArgumentError, "#Role '#{role_name}' doesn't exists" if !defined?(@roles) || !@roles[role_name.to_sym]
+      if !defined?(@roles) || !@roles[role_name.to_sym]
+        raise ArgumentError, "#Role '#{role_name}' doesn't exists"
+      end
       @roles[role_name.to_sym]
     end
     
@@ -37,8 +39,20 @@ module YaAcl
     end
 
     def resource(resource_name)
-      raise ArgumentError, "#Resource '#{resource_name}' doesn't exists" if !defined?(@resources) || !@resources[resource_name.to_sym]
+      if !defined?(@resources) || !@resources[resource_name.to_sym]
+        raise ArgumentError, "#Resource '#{resource_name}' doesn't exists"
+      end
       @resources[resource_name.to_sym]
+    end
+
+    def privilege(resource_name, privilege_name)
+      r = resource(resource_name)
+      p = privilege_name.to_sym
+      unless @acl[r.name][p]
+        raise ArgumentError, "Undefine privilege '#{privilege_name}' for resource '#{resource_name}'"
+      end
+
+      @acl[r.name][p]
     end
 
     def add_assert(assert)
@@ -47,28 +61,28 @@ module YaAcl
     end
 
     def assert(assert_name)
-      raise ArgumentError, "#Assert '#{assert_name}' doesn't exists" if !defined?(@asserts) || !@asserts[assert_name.to_sym]
+      if !defined?(@asserts) || !@asserts[assert_name.to_sym]
+        raise ArgumentError, "#Assert '#{assert_name}' doesn't exists"
+      end
       @asserts[assert_name.to_sym]
     end
 
-    def allow(resource_name, privilege_name, role_name, assert_name = nil, options = {})
+    def allow(resource_name, privilege_name, role_name, assert_name = nil)
       resource  = resource(resource_name).name
       privilege = privilege_name.to_sym
       role      = role(role_name).name
-      key       = build_key(options)
 
       @acl[resource] ||= {}
       @acl[resource][privilege] ||= {}
-      @acl[resource][privilege][key] ||= {}
-      @acl[resource][privilege][key][role] ||= {}
+      @acl[resource][privilege][role] ||= {}
       if assert_name
         assert = assert(assert_name)
-        @acl[resource][privilege][key][role][assert.name] = assert
+        @acl[resource][privilege][role][assert.name] = assert
       end
     end
 
-    def check(resource_name, privilege_name, roles = [], params = [], options = {})
-      a_l = access_list(resource_name, privilege_name, options)
+    def check(resource_name, privilege_name, roles = [], params = [])
+      a_l = privilege(resource_name, privilege_name)
       roles_for_check = a_l.keys & roles.map(&:to_sym)
       return Result.new(false) if roles_for_check.empty? # return
 
@@ -92,12 +106,12 @@ module YaAcl
       Result.new(false, role_for_result, assert_for_result) # return
     end
 
-    def allow?(resource_name, privilege_name, roles = [], params = [], options = {})
-      check(resource_name, privilege_name, roles, params, options).status
+    def allow?(resource_name, privilege_name, roles = [], params = [])
+      check(resource_name, privilege_name, roles, params).status
     end
 
-    def check!(resource_name, privilege_name, roles = [], params = [], options = {})
-      result = check(resource_name, privilege_name, roles, params, options)
+    def check!(resource_name, privilege_name, roles = [], params = [])
+      result = check(resource_name, privilege_name, roles, params)
       return true if result.status
       
       message = "Access denied for '#{resource_name}', privilege '#{privilege_name}', options '#{options.inspect}'"
@@ -106,36 +120,6 @@ module YaAcl
       else
         raise AccessDeniedError, message + " and roles '#{roles.inspect}'"
       end
-    end
-
-    protected
-
-    def access_list(resource_name, privilege_name, options = {})
-      r = resource(resource_name)
-      p = privilege_name.to_sym
-      unless @acl[r.name][p]
-        raise ArgumentError, "Undefine privilege '#{privilege_name}' for resource '#{resource_name}'"
-      end
-
-      data = @acl[r.name][p][:default]
-      @acl[r.name][p].each_pair do |privilege_key, privilege_params|
-        next if privilege_key == :default
-        privilege_options = Marshal.load(privilege_key)
-
-        compare = true
-        privilege_options.each_pair do |key, value|
-          compare = false if options[key] != value
-        end
-        next unless compare
-        
-        data = privilege_params
-      end
-      
-      data
-    end
-    
-    def build_key(options = {})
-      options.any? ? Marshal.dump(options) : :default
     end
   end
 end

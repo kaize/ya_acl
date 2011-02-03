@@ -43,7 +43,6 @@ describe YaAcl::Builder do
       end
     end
     
-    acl.allow?(:name, :update, [:operator]).should be_false
     acl.check!(:name, :index, [:admin]).should be_true
     acl.check!(:name, :index, [:another_admin]).should be_true
     acl.check!(:name, :index, [:operator]).should be_true
@@ -52,8 +51,6 @@ describe YaAcl::Builder do
     acl.allow?(:name, :show, [:user]).should be_false
     acl.allow?(:name, :show, [:operator]).should be_true
     acl.allow?(:name, :edit, [:operator]).should be_false
-
-    acl.allow?(:name, :update, [:operator]).should be_false
   end
 
   it 'should be raise exception for unknown role in privilegy' do

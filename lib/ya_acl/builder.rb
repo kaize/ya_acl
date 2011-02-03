@@ -50,7 +50,7 @@ module YaAcl
         instance_eval &block
       end
 
-      def privilege(privilege_name, roles = [], options = {}, &asserts_block)
+      def privilege(privilege_name, roles = [], &asserts_block)
         all_allow_roles = roles | @allow_roles
 
         asserts = {}
@@ -62,10 +62,10 @@ module YaAcl
         all_allow_roles.each do |role|
           if asserts[role]
             asserts[role].each do |assert|
-              @acl.allow(@resource_name, privilege_name, role, assert, options)
+              @acl.allow(@resource_name, privilege_name, role, assert)
             end
           else
-            @acl.allow(@resource_name, privilege_name, role, nil, options)
+            @acl.allow(@resource_name, privilege_name, role, nil)
           end
         end
       end
