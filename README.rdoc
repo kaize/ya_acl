@@ -7,7 +7,7 @@ Ya_Acl представляет собой самостоятельный объ
 
 === Установка
 
-    gem install ya_acl, :source => "http://gems.undev.cc"
+    gem install ya_acl
 
 === Основные понятия
 
@@ -28,15 +28,13 @@ Ya_Acl представляет собой самостоятельный объ
 Assert - динамические проверки, например, является ли залогиненый пользователь владельцем этого объекта.
 Проверки могут ставиться на конкретные роли для текущей привилегии, а не просто "на привилегию".
 Владение несколькими ролями. Если хотя бы одной из ролей пользователя разрешен доступ к привилегии ресурса, то доступ открыт.
-Роль с глобальным доступом ко всем ресурсом. Передается аргументом в метод билдера "resources".
+Роль с глобальным доступом ко всем ресурсам. Передается аргументом в метод билдера "resources".
 Наследование ролей для ресурсов. То есть мы можем определить роли которым автоматически станут доступны все привилегии ресурса.
-Опции для привилегий, обычно используется для разных форматов, например, для html одни правила, а для json другие.
 
 === Порядок выполнения проверок на доступность к привилегии ресурса
 
-1. Проверяется наличие привилегии с переданными опциями. Если ее нет используется та которая без была определена без опций.
-2. Если ни одна из переданных ролей не имеет доступа к привилегии ресурса, то доступ запрещается.
-3. Для каждой роли, имеющий доступ к привилегии, проверяются проверки предназначенные для этой роли. Если хотя бы для одной роли прошли все проверки, то доступ разрешается.
+1. Если ни одна из переданных ролей не имеет доступа к привилегии ресурса, то доступ запрещается.
+2. Для каждой роли, имеющий доступ к привилегии, проверяются проверки предназначенные для этой роли. Если хотя бы для одной роли прошли все проверки, то доступ разрешается.
 
 === Workflow
 
@@ -51,12 +49,12 @@ Assert - динамические проверки, например, являе
       end
 
       asserts do # Проверки
-        assert :assert_name do |first, second|
-          first == second
+        assert :assert_name, [:current_user_id, :another_user_id] do
+          current_user_id == another_user_id
         end
 
-        assert :another_assert_name do |first, second|
-          first != second
+        assert :another_assert_name, [:current_user_id, :another_user_id] do
+          current_user_id != another_user_id
         end
       end
 
@@ -64,7 +62,7 @@ Assert - динамические проверки, например, являе
         resource 'UserController', [:editor] do # Ресурс и роли которым доступны все привилегии данного ресурса
           privilege :index, [:operator] # доступно для :admin, :editor, :operator
           privilege :edit # доступно для :admin, :editor
-          privilege :new do |first, second|
+          privilege :new do
             assert :assert_name, [:editor] # Эта проверка будет вызвана только для роли :editor
             assert :another_assert_name # Эта проверка будет вызвана для ролей :admin, :editor
           end
@@ -79,8 +77,8 @@ Assert - динамические проверки, например, являе
     acl.allow?('UserController', :index, [:editor, :opeartor]) # true
     acl.allow?('UserController', :edit, [:editor, :opeartor]) # true
     acl.allow?('UserController', :edit, [:opeartor]) # false
-    acl.allow?('UserController', :new, [:admin], [1, 2]) # true
-    acl.allow?('UserController', :new, [:editor], [1, 2]) # false
+    acl.allow?('UserController', :new, [:admin], :current_user_id => 1, :another_user_id => 1) # true
+    acl.allow?('UserController', :new, [:editor], :current_user_id => 1, :another_user_id => 2) # false
 
     acl#check - возвращает объект результата YaAcl::Result
     acl#check! - возвращает true или бросает исключение
