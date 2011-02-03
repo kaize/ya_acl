@@ -21,11 +21,11 @@ describe YaAcl::Builder do
       end
 
       asserts do
-        assert :first_assert do |param, param2|
+        assert :first_assert, [:param, :param2] do
           param == param2
         end
 
-        assert :another_assert do |param, param2|
+        assert :another_assert, [:param, :param2] do
           param != param2
         end
       end
@@ -95,35 +95,35 @@ describe YaAcl::Builder do
       end
 
       asserts do
-        assert :first do |var|
+        assert :first, [:var] do
           var
         end
 
-        assert :another do |first, second|
+        assert :another, [:first] do
           statuses = [1, 2]
           statuses.include? first
         end
 
-        assert :another2 do |first, second|
+        assert :another2, [:first] do
           !!first
         end
 
-        assert :another3 do |first, second|
+        assert :another3, [:first] do
           statuses = [1, 2]
           statuses.include? first
         end
 
-        assert :another4 do |first, second|
+        assert :another4, [:first, :second] do
           first == second
         end
       end
 
       resources :admin do
         resource :name, [:editor, :operator] do
-          privilege :create do |var|
+          privilege :create do
             assert :first, [:admin, :another_user]
           end
-          privilege :update do |first, second|
+          privilege :update do
             assert :another, [:editor]
             assert :another2, [:editor, :operator]
             assert :another3, [:operator]
@@ -134,13 +134,13 @@ describe YaAcl::Builder do
     end
 
     acl.allow?(:name, :update, [:another_user]).should be_false
-    acl.allow?(:name, :update, [:editor], [true, false]).should be_false
-    acl.allow?(:name, :update, [:editor], [false, true]).should be_false
-    acl.allow?(:name, :update, [:editor], [1, true]).should be_true
-    acl.check!(:name, :create, [:admin], [2]).should be_true
-    acl.allow?(:name, :update, [:editor], [3, false]).should be_false
-    acl.allow?(:name, :update, [:operator], [true, true]).should be_false
-    acl.allow?(:name, :update, [:operator], [1, 1]).should be_true
-    acl.allow?(:name, :update, [:operator], [3, 3]).should be_false
+    acl.allow?(:name, :update, [:editor], :first => true, :second => false).should be_false
+    acl.allow?(:name, :update, [:editor], :first => false, :second => true).should be_false
+    acl.allow?(:name, :update, [:editor], :first => 1, :second => true).should be_true
+    acl.check!(:name, :create, [:admin], :var => 2).should be_true
+    acl.allow?(:name, :update, [:editor], :first => 3, :second => false).should be_false
+    acl.allow?(:name, :update, [:operator], :first => true, :second => true).should be_false
+    acl.allow?(:name, :update, [:operator], :first => 1, :second => 1).should be_true
+    acl.allow?(:name, :update, [:operator], :first => 3, :second => 3).should be_false
   end
 end

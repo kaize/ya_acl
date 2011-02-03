@@ -12,9 +12,10 @@ describe YaAcl::Acl do
     @acl.add_role YaAcl::Role.new(:member)
     @acl.add_role YaAcl::Role.new(:guest)
 
-    assert = YaAcl::Assert.new:assert do |object_user_id, user_id|
+    assert = YaAcl::Assert.new :assert, [:object_user_id, :user_id] do
       object_user_id == user_id
     end
+    
     @acl.add_assert assert
   end
 
@@ -36,14 +37,13 @@ describe YaAcl::Acl do
     @acl.allow :name, :index, :member, :assert
 
 
-    @acl.allow?(:name, :index, [:guest], [3, 4]).should be_false
-    @acl.allow?(:name, :index, [:guest], [3, 3]).should be_true
-    @acl.allow?(:name, :index, [:member])
+    @acl.allow?(:name, :index, [:guest], :object_user_id => 3, :user_id => 4).should be_false
+    @acl.allow?(:name, :index, [:guest], :object_user_id => 3, :user_id => 3).should be_true
   end
 
   it 'should be work with roles' do
-    assert = YaAcl::Assert.new :another_assert do
-      false
+    assert = YaAcl::Assert.new :another_assert, [:var] do
+      var
     end
     @acl.add_assert assert
     @acl.allow :name, :index, :admin
@@ -51,6 +51,6 @@ describe YaAcl::Acl do
     @acl.allow :name, :index, :guest, :another_assert
 
     @acl.allow?(:name, :empty, [:guest, :admin]).should be_true
-    @acl.allow?(:name, :index, [:guest, :admin]).should be_true
+    @acl.allow?(:name, :index, [:guest, :admin], :var => false).should be_true
   end
 end

@@ -81,7 +81,7 @@ module YaAcl
       end
     end
 
-    def check(resource_name, privilege_name, roles = [], params = [])
+    def check(resource_name, privilege_name, roles = [], params = {})
       a_l = privilege(resource_name, privilege_name)
       roles_for_check = a_l.keys & roles.map(&:to_sym)
       return Result.new(false) if roles_for_check.empty? # return
@@ -106,11 +106,11 @@ module YaAcl
       Result.new(false, role_for_result, assert_for_result) # return
     end
 
-    def allow?(resource_name, privilege_name, roles = [], params = [])
+    def allow?(resource_name, privilege_name, roles = [], params = {})
       check(resource_name, privilege_name, roles, params).status
     end
 
-    def check!(resource_name, privilege_name, roles = [], params = [])
+    def check!(resource_name, privilege_name, roles = [], params = {})
       result = check(resource_name, privilege_name, roles, params)
       return true if result.status
       

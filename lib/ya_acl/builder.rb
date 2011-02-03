@@ -25,8 +25,8 @@ module YaAcl
       instance_eval &block
     end
 
-    def assert(name, &block)
-      acl.add_assert Assert.new(name, &block)
+    def assert(name, param_names, &block)
+      acl.add_assert Assert.new(name, param_names, &block)
     end
 
     def resources(allow, &block)
@@ -55,7 +55,7 @@ module YaAcl
 
         asserts = {}
         if block_given?
-          proxy = AssertProxy.new(asserts_block, all_allow_roles)
+          proxy = PrivilegeAssertProxy.new(asserts_block, all_allow_roles)
           asserts = proxy.asserts
         end
         
@@ -71,7 +71,7 @@ module YaAcl
       end
     end
 
-    class AssertProxy
+    class PrivilegeAssertProxy
       attr_reader :asserts
       
       def initialize(block, all_allow_roles)
