@@ -69,7 +69,6 @@ module YaAcl
 
     def check(resource_name, privilege_name, roles = [], params = [], options = {})
       a_l = access_list(resource_name, privilege_name, options)
-      return Result.new(false) if a_l.nil?
       roles_for_check = a_l.keys & roles.map(&:to_sym)
       return Result.new(false) if roles_for_check.empty? # return
 
@@ -79,7 +78,6 @@ module YaAcl
         role_for_result = role
         asserts = a_l[role]
         return Result.new if asserts.empty? #return
-        assert = nil
         result = true
         asserts.values.each do |assert|
           assert_for_result = assert
@@ -91,7 +89,7 @@ module YaAcl
         end
       end
 
-      return Result.new(false, role_for_result, assert_for_result) # return
+      Result.new(false, role_for_result, assert_for_result) # return
     end
 
     def allow?(resource_name, privilege_name, roles = [], params = [], options = {})
@@ -132,13 +130,12 @@ module YaAcl
         
         data = privilege_params
       end
+      
       data
     end
     
     def build_key(options = {})
       options.any? ? Marshal.dump(options) : :default
     end
-
-    private
   end
 end

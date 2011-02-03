@@ -1,64 +1,86 @@
 == ya_acl
 
-http://en.wikipedia.org/wiki/Role-based_access_control
-http://en.wikipedia.org/wiki/Assertion_(computing)
+Ya_Acl - реализация списка прав доступа (ACL).
 
-    acl = YaAcl::Builder.build do
-      roles do
+Ya_Acl представляет собой самостоятельный объект посредством которого производятся все проверки.
+Это значит что он не привязан к фреймворкам и это руководство предлагает только один из возможных путей использования этого компонента.
+
+=== Установка
+
+    gem install ya_acl, :source => "http://gems.undev.cc"
+
+=== Основные понятия
+
+Ресурс - объект, доступ к которому контролируется.
+Привилегия - действие совершаемое над ресурсом.
+Роль - объект, который может запрашивать доступ к ресурсу.
+
+Роль(роли) запрашивает доступ к привилегии ресурса.
+Например ресурс "пользователь" может иметь привилегию "создать".
+
+=== Начальные условия
+
+- По умолчанию все запрещено. И по ходу можно только выставлять разрешения, но не запреты.
+- Все ресурсы должны быть добавлены в acl (в противном случае получите исключение).
+
+=== Основные возможности
+
+Assert - динамические проверки, например, является ли залогиненый пользователь владельцем этого объекта.
+Проверки могут ставиться на конкретные роли для текущей привилегии, а не просто "на привилегию".
+Владение несколькими ролями. Если хотя бы одной из ролей пользователя разрешен доступ к привилегии ресурса, то доступ открыт.
+Роль с глобальным доступом ко всем ресурсом. Передается аргументом в метод билдера "resources".
+Наследование ролей для ресурсов. То есть мы можем определить роли которым автоматически станут доступны все привилегии ресурса.
+Опции для привилегий, обычно используется для разных форматов, например, для html одни правила, а для json другие.
+
+=== Порядок выполнения проверок на доступность к привилегии ресурса
+
+1. Проверяется наличие привилегии с переданными опциями. Если ее нет используется та которая без была определена без опций.
+2. Если ни одна из переданных ролей не имеет доступа к привилегии ресурса, то доступ запрещается.
+3. Для каждой роли, имеющий доступ к привилегии, проверяются проверки предназначенные для этой роли. Если хотя бы для одной роли прошли все проверки, то доступ разрешается.
+
+=== Workflow
+
+В начале необходимо проинициализировать объект acl.
+Для этого необходимо создать файл (структура ниже) который будет загружаться при старте приложения. Хотя в development среде вы можете захотеть подгружать его при каждом запросе для удобства разработки.
+
+    YaAcl::Builder.build do
+      roles do # Роли
         role :admin
-        role :another_user
         role :editor
         role :operator
       end
 
-      asserts do
-        assert :first do |var|
-          var
-        end
-
-        assert :another do |first, second|
-          statuses = [1, 2]
-          statuses.include? first
-        end
-
-        assert :another2 do |first, second|
-          !!first
-        end
-
-        assert :another3 do |first, second|
-          statuses = [1, 2]
-          statuses.include? first
-        end
-
-        assert :another4 do |first, second|
+      asserts do # Проверки
+        assert :assert_name do |first, second|
           first == second
+        end
+
+        assert :another_assert_name do |first, second|
+          first != second
         end
       end
 
-      resources :admin do
-        resource :name, [:editor, :operator] do
-          privilege :create do |var|
-            assert :first, [:admin, :another_user]
+      resources :admin do # Ресурсы и роль которой доступно все
+        resource 'UserController', [:editor] do # Ресурс и роли которым доступны все привилегии данного ресурса
+          privilege :index, [:operator] # доступно для :admin, :editor, :operator
+          privilege :edit # доступно для :admin, :editor
+          privilege :new do |first, second|
+            assert :assert_name, [:editor] # Эта проверка будет вызвана только для роли :editor
+            assert :another_assert_name # Эта проверка будет вызвана для ролей :admin, :editor
           end
-          privilege :update do |first, second|
-            assert :another, [:editor]
-            assert :another2, [:editor, :operator]
-            assert :another3, [:operator]
-            assert :another4, [:operator]
-          end
-          privilege :edit
-          privilege :new, [:another_user]
         end
       end
     end
 
-    acl.allow?(:name, :update, [:another_user])           # false
-    acl.allow?(:name, :update, [:editor], [true, false])  # false
-    acl.allow?(:name, :update, [:editor], [1, true])      # true
-    acl.check!(:name, :create, [:admin], [2])             # true
-    acl.allow?(:name, :update, [:editor], [3, false])     # false
-    acl.allow?(:name, :update, [:operator], [true, true]) # false
-    acl.allow?(:name, :update, [:operator], [1, 1])       # true
-    acl.allow?(:name, :update, [:operator], [3, 3])       # false
-    acl.allow?(:name, :edit, [:operator])                 # true
-    acl.allow?(:name, :new, [:another_user])              # true
+После этого будет доступен объект acl через YaAcl::Acl.instance.
+
+    acl = YaAcl::Acl.instance
+
+    acl.allow?('UserController', :index, [:editor, :opeartor]) # true
+    acl.allow?('UserController', :edit, [:editor, :opeartor]) # true
+    acl.allow?('UserController', :edit, [:opeartor]) # false
+    acl.allow?('UserController', :new, [:admin], [1, 2]) # true
+    acl.allow?('UserController', :new, [:editor], [1, 2]) # false
+
+    acl#check - возвращает объект результата YaAcl::Result
+    acl#check! - возвращает true или бросает исключение

@@ -21,13 +21,8 @@ describe YaAcl::Acl do
   it 'should be work allow?' do
     @acl.allow :name, :index, :admin
     @acl.allow :name, :index, :member
-    @acl.allow :name, :index, :moderator, nil, :format => 'json'
-    @acl.allow :name, :update, :editor, nil, :format => 'json'
     @acl.allow :name, :update, :admin
 
-    @acl.allow?(:name, :index, ['admin'], [], :format => :xml).should be_true
-    @acl.allow?(:name, 'index', [:moderator], [], :format => 'json').should be_true
-    @acl.allow?(:name, :index, [:moderator], [], :format => :xml).should be_false
     @acl.allow?(:name, :index, [:admin]).should be_true
     @acl.allow?(:name, :index, [:nobody, :admin]).should be_true
     @acl.allow?(:name, :index, [:nobody, :another_nobody]).should be_false
@@ -40,13 +35,9 @@ describe YaAcl::Acl do
     @acl.allow :name, :index, :guest, :assert, :format => 'xml'
     @acl.allow :name, :index, :member, :assert
 
-    @acl.allow?(:name, :index, [:guest], [3, 4], :format => 'xml').should be_false
 
     @acl.allow?(:name, :index, [:guest], [3, 4]).should be_false
     @acl.allow?(:name, :index, [:guest], [3, 3]).should be_false
-    @acl.allow?(:name, :index, [:guest], [3, 3], :format => 'xml').should be_true
-    @acl.allow?(:name, :index, [:guest], [], :format => 'xml').should be_true
-    @acl.allow?(:name, :index, [:admin], [3, 4], :format => 'xml').should be_true
     @acl.allow?(:name, :index, [:member])
   end
 
