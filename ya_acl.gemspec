@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Mokevnin Kirill"]
   s.email       = ["mokevnin@gmail.com"]
-  s.homepage    = "http://github.com/mokevnin/ya_acl"
+  s.homepage    = "http://github.com/kaize/ya_acl"
   s.summary     = %q{Yet Another ACL}
   s.description = %q{Yet Another ACL}
 
