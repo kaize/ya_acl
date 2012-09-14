@@ -1,6 +1,6 @@
 == ya_acl
 
-[![Build Status](https://secure.travis-ci.org/kaize/ya_acl.png)](http://travis-ci.org/kaize/ya_acl)
+{<img src="https://secure.travis-ci.org/kaize/ya_acl.png" alt="Build Status" />}[http://travis-ci.org/kaize/ya_acl]
 
 Ya_Acl - реализация списка прав доступа (ACL).
 
