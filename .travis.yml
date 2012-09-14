@@ -5,3 +5,4 @@ rvm:
   - 1.9.3
   - rbx
   - jruby
+script: "rspec spec"
