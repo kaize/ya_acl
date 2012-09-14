@@ -1,5 +1,7 @@
 == ya_acl
 
+[![Build Status](https://secure.travis-ci.org/kaize/ya_acl.png)](http://travis-ci.org/kaize/ya_acl)
+
 Ya_Acl - реализация списка прав доступа (ACL).
 
 Ya_Acl представляет собой самостоятельный объект посредством которого производятся все проверки.
