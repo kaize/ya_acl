@@ -42,7 +42,7 @@ describe YaAcl::Builder do
         end
       end
     end
-    
+
     acl.check!(:name, :index, [:admin]).should be_true
     acl.check!(:name, :index, [:another_admin]).should be_true
     acl.check!(:name, :index, [:operator]).should be_true
@@ -142,5 +142,19 @@ describe YaAcl::Builder do
     acl.allow?(:name, :update, [:operator], :first => true, :second => true).should be_false
     acl.allow?(:name, :update, [:operator], :first => 1, :second => 1).should be_true
     acl.allow?(:name, :update, [:operator], :first => 3, :second => 3).should be_false
+  end
+
+  it 'should be work without global role' do
+    acl = YaAcl::Builder.build do
+      roles do
+        role :admin
+      end
+
+      resource :name, [:admin] do
+        privilege :index
+      end
+    end
+
+    acl.check!(:name, :index, [:admin]).should be_true
   end
 end
