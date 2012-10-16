@@ -2,55 +2,56 @@
 
 {<img src="https://secure.travis-ci.org/kaize/ya_acl.png" alt="Build Status" />}[http://travis-ci.org/kaize/ya_acl]
 
-Ya_Acl - реализация списка прав доступа (ACL).
+Ya_Acl - access control list (ACL) implementation for your Ruby application.
 
-Ya_Acl представляет собой самостоятельный объект посредством которого производятся все проверки.
-Это значит что он не привязан к фреймворкам и это руководство предлагает только один из возможных путей использования этого компонента.
+Ya_Acl provides a standalone object through which all checks are made.
+This means it is not tied to any framework. Note that this guide will show you only one possible way to use this component.
 
-=== Установка
+=== Installation
 
     gem install ya_acl
 
-=== Основные понятия
+=== Keywords
 
-Ресурс - объект, доступ к которому контролируется.
-Привилегия - действие совершаемое над ресурсом.
-Роль - объект, который может запрашивать доступ к ресурсу.
+Resource - object to restrict access to.
+Privilege - action on the resource.
+Role - object, which can request for an access to a resource.
 
-Роль(роли) запрашивает доступ к привилегии ресурса.
-Например ресурс "пользователь" может иметь привилегию "создать".
+Role(s) request for an access to the resource privileges.
+For example, resource "user" can have privilege "create."
 
-=== Начальные условия
+=== Initial conditions
 
-- По умолчанию все запрещено. И по ходу можно только выставлять разрешения, но не запреты.
-- Все ресурсы должны быть добавлены в acl (в противном случае получите исключение).
+- By default, everything is forbidden. Further you will only be able to grant access to a particular resource, not restrict it.
+- All resources must be added to the acl (otherwise you will get an exception).
 
-=== Основные возможности
+=== Key features
 
-Assert - динамические проверки, например, является ли залогиненый пользователь владельцем этого объекта.
-Проверки могут ставиться на конкретные роли для текущей привилегии, а не просто "на привилегию".
-Владение несколькими ролями. Если хотя бы одной из ролей пользователя разрешен доступ к привилегии ресурса, то доступ открыт.
-Роль с глобальным доступом ко всем ресурсам. Передается аргументом в метод билдера "resources".
-Наследование ролей для ресурсов. То есть мы можем определить роли которым автоматически станут доступны все привилегии ресурса.
+Asserts - runtime checks, e.g. "whether logged in user is the owner of this object".
+Checks can be assigned to specific roles of the current privilege, not just "on the privilege".
+Owning multiple roles. If at least one of the user roles has access to the resource privilege,
+access granted. Role with global access to all resources. Passed as an argument to the `Builder::resources`
+method. Roles inheritance. That is, we could define a role that will automatically get all resource privileges.
 
-=== Порядок выполнения проверок на доступность к привилегии ресурса
+=== The order of checking for an access to resource privilege
 
-1. Если ни одна из переданных ролей не имеет доступа к привилегии ресурса, то доступ запрещается.
-2. Для каждой роли, имеющий доступ к привилегии, проверяются проверки предназначенные для этой роли. Если хотя бы для одной роли прошли все проверки, то доступ разрешается.
+1. If none of the passed roles does not have access to the resource privilege - access denied.
+2. For each role, which has access to the privilege, we run all checks. If at least one role passed the checks - access allowed.
 
 === Workflow
 
-В начале необходимо проинициализировать объект acl.
-Для этого необходимо создать файл (структура ниже) который будет загружаться при старте приложения. Хотя в development среде вы можете захотеть подгружать его при каждом запросе для удобства разработки.
+First, we should initialize our acl object. To do this, create a file
+(you could use the structure sample below), which will be loaded on startup.
+Although, in development environment, you may want to load it before each request.
 
     YaAcl::Builder.build do
-      roles do # Роли
+      roles do # Roles
         role :admin
         role :editor
         role :operator
       end
 
-      asserts do # Проверки
+      asserts do # Checks
         assert :assert_name, [:current_user_id, :another_user_id] do
           current_user_id == another_user_id
         end
@@ -60,19 +61,19 @@ Assert - динамические проверки, например, являе
         end
       end
 
-      resources :admin do # Ресурсы и роль которой доступно все
-        resource 'UserController', [:editor] do # Ресурс и роли которым доступны все привилегии данного ресурса
-          privilege :index, [:operator] # доступно для :admin, :editor, :operator
-          privilege :edit # доступно для :admin, :editor
+      resources :admin do # Resources and role with admin privileges
+        resource 'UserController', [:editor] do # Resource and roles, which have access to the all privileges of a given resource
+          privilege :index, [:operator] # allowed for :admin, :editor, :operator
+          privilege :edit # allowed for :admin, :editor
           privilege :new do
-            assert :assert_name, [:editor] # Эта проверка будет вызвана только для роли :editor
-            assert :another_assert_name # Эта проверка будет вызвана для ролей :admin, :editor
+            assert :assert_name, [:editor] # This check will be called for role :editor
+            assert :another_assert_name # This check will be called for :admin and :editor roles
           end
         end
       end
     end
 
-После этого будет доступен объект acl через YaAcl::Acl.instance.
+After that, acl object becomes accessible via YaAcl::Acl.instance.
 
     acl = YaAcl::Acl.instance
 
@@ -82,5 +83,5 @@ Assert - динамические проверки, например, являе
     acl.allow?('UserController', :new, [:admin], :current_user_id => 1, :another_user_id => 1) # true
     acl.allow?('UserController', :new, [:editor], :current_user_id => 1, :another_user_id => 2) # false
 
-    acl#check - возвращает объект результата YaAcl::Result
-    acl#check! - возвращает true или бросает исключение
+    acl#check - returns YaAcl::Result object
+    acl#check! - returns true or throws an exception
