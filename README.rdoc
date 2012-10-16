@@ -18,7 +18,7 @@ Privilege - action on the resource.
 Role - object, which can request for an access to a resource.
 
 Role(s) request for an access to the resource privileges.
-For example, resource "user" can have privilege "create."
+For example, resource "user" can have a privilege "create".
 
 === Initial conditions
 
@@ -33,16 +33,16 @@ Owning multiple roles. If at least one of the user roles has access to the resou
 access granted. Role with global access to all resources. Passed as an argument to the `Builder::resources`
 method. Roles inheritance. That is, we could define a role that will automatically get all resource privileges.
 
-=== The order of checking for an access to resource privilege
+=== Access check algorithm
 
-1. If none of the passed roles does not have access to the resource privilege - access denied.
-2. For each role, which has access to the privilege, we run all checks. If at least one role passed the checks - access allowed.
+1. If none of the passed roles have access to resource privilege - access denied.
+2. If any, for each role we run asserts. If at least one role passed these checks - access granted.
 
 === Workflow
 
-First, we should initialize our acl object. To do this, create a file
-(you could use the structure sample below), which will be loaded on startup.
-Although, in development environment, you may want to load it before each request.
+First, initialize acl object by creating the config file
+(you could use the structure sample below). It should be loaded while your application starts.
+Although, in development environment, you may want it to be loaded before each request.
 
     YaAcl::Builder.build do
       roles do # Roles
