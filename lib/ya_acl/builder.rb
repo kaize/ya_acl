@@ -3,26 +3,25 @@ module YaAcl
     attr_accessor :acl
 
     def self.build &block
-      builder = new
-      builder.instance_eval &block
-      builder.acl.freeze
+      builder = new block
       Acl.instance = builder.acl
     end
 
-    def initialize
+    def initialize block
       self.acl = Acl.new
+      instance_eval &block
     end
 
     def roles(&block)
       instance_eval &block
     end
 
-    def role(name, options = {})
-      acl.add_role Role.new(name, options)
-    end
-
     def asserts(&block)
       instance_eval &block
+    end
+
+    def role(name, options = {})
+      acl.add_role Role.new(name, options)
     end
 
     def assert(name, param_names, &block)
@@ -55,10 +54,9 @@ module YaAcl
 
         asserts = {}
         if block_given?
-          proxy = PrivilegeAssertProxy.new(asserts_block, all_allow_roles)
-          asserts = proxy.asserts
+          asserts = PrivilegeAssertProxy.build asserts_block, all_allow_roles
         end
-        
+
         all_allow_roles.each do |role|
           if asserts[role]
             asserts[role].each do |assert|
@@ -73,7 +71,12 @@ module YaAcl
 
     class PrivilegeAssertProxy
       attr_reader :asserts
-      
+
+      def self.build(block, all_allow_roles)
+        builder = new block, all_allow_roles
+        builder.asserts
+      end
+
       def initialize(block, all_allow_roles)
         @all_allow_roles = all_allow_roles
         @asserts = {}

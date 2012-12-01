@@ -1,8 +1,4 @@
 module YaAcl
-
-  class AccessDeniedError < StandardError ; end
-  class AssertAccessDeniedError < AccessDeniedError ; end
-
   class Acl
 
     attr_reader :roles, :resources, :asserts
@@ -113,7 +109,7 @@ module YaAcl
     def check!(resource_name, privilege_name, roles = [], params = {})
       result = check(resource_name, privilege_name, roles, params)
       return true if result.status
-      
+
       message = "Access denied for '#{resource_name}', privilege '#{privilege_name}'"
       if result.assert
         raise AssertAccessDeniedError, message + ", role '#{result.role}' and assert '#{result.assert.name}'"

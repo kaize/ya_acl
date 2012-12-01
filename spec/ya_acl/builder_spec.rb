@@ -7,7 +7,7 @@ describe YaAcl::Builder do
         role :admin, :name => 'Administrator'
       end
     end
-    
+
     acl.role(:admin).should_not be_nil
   end
 

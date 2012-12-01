@@ -15,7 +15,7 @@ describe YaAcl::Acl do
     assert = YaAcl::Assert.new :assert, [:object_user_id, :user_id] do
       object_user_id == user_id
     end
-    
+
     @acl.add_assert assert
   end
 
