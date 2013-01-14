@@ -1,6 +1,7 @@
 == ya_acl
 
 {<img src="https://secure.travis-ci.org/kaize/ya_acl.png" alt="Build Status" />}[http://travis-ci.org/kaize/ya_acl]
+{<img src="https://coveralls.io/repos/kaize/ya_acl/badge.png?branch=master" alt="Coverage" />}[https://coveralls.io/r/kaize/ya_acl]
 
 Ya_Acl - access control list (ACL) implementation for your Ruby application.
 
